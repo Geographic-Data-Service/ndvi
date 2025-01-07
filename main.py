@@ -155,12 +155,21 @@ def calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes):
         dict: Statistics for the LSOA.
     """
     overlapping_rasters = find_overlapping_rasters_lsoa(lsoa, rtree_idx, raster_bboxes)
-    all_ndvi_values, all_evi_values, all_raster_data = process_rasters(overlapping_rasters, lsoa)
+    all_ndvi_values, all_evi_values, all_raster_data = process_rasters(
+        overlapping_rasters, lsoa
+    )
 
     if all_ndvi_values:
         veg_fraction = np.sum(np.array(all_ndvi_values) > 0.2) / len(all_ndvi_values)
         cv_ndvi = np.nanstd(all_ndvi_values) / np.nanmean(all_ndvi_values)
-        return compile_stats(lsoa, all_ndvi_values, all_evi_values, all_raster_data, veg_fraction, cv_ndvi)
+        return compile_stats(
+            lsoa,
+            all_ndvi_values,
+            all_evi_values,
+            all_raster_data,
+            veg_fraction,
+            cv_ndvi,
+        )
     else:
         return compile_empty_stats(lsoa)
 
@@ -205,7 +214,9 @@ def process_rasters(overlapping_rasters, lsoa):
     return all_ndvi_values, all_evi_values, all_raster_data
 
 
-def compile_stats(lsoa, all_ndvi_values, all_evi_values, all_raster_data, veg_fraction, cv_ndvi):
+def compile_stats(
+    lsoa, all_ndvi_values, all_evi_values, all_raster_data, veg_fraction, cv_ndvi
+):
     """Compiles statistics for an LSOA with valid NDVI values.
 
     Args:
