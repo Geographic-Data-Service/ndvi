@@ -5,7 +5,6 @@
 
 This project processes Sentinel data to calculate vegetation indices and compile statistics for Local Super Output Areas (LSOAs). The output is saved as a Parquet file containing NDVI and EVI statistics for each LSOA.
 
-![NDVI Mean](./img/nvdi_mean.png)
 
 ## 📚 Table of Contents
 
@@ -102,3 +101,5 @@ python demo.py
 ```
 
 This will display a plot of the mean NDVI values for each LSOA.
+
+![NDVI Mean](./img/nvdi_mean.png)
