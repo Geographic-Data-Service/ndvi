@@ -1,13 +1,9 @@
 import glob
 
-import dask
 import geopandas as gpd
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import rasterio
-from dask.delayed import delayed
-from dask.diagnostics.progress import ProgressBar
 from rasterio.mask import mask
 from rtree import index
 from scipy.ndimage import median_filter
@@ -190,17 +186,10 @@ def main():
 
     lsoa_boundaries = read_lsoa()
 
-    tasks = [
-        delayed(calculate_lsoa_stats)(lsoa, rtree_idx, raster_bboxes)
-        for lsoa in lsoa_boundaries.copy().itertuples()
+    results = [
+        calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes)
+        for lsoa in tqdm(lsoa_boundaries.itertuples())
     ]
-
-    with ProgressBar():
-        results = dask.compute(*tasks)
-    # results = [
-    #     calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes)
-    #     for lsoa in tqdm(lsoa_boundaries.itertuples())
-    # ]
     df = pd.DataFrame(results)
 
     df.to_parquet("./gisdata/ndvi.parquet", index=False)
@@ -208,10 +197,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    df = pd.read_parquet("./gisdata/ndvi.parquet")
-    ahah_gs = pd.read_csv("./gisdata/AHAH_V4.csv")[["LSOA21CD", "ah4gpas"]]
-    ahah_gs.merge(df, on="LSOA21CD")[["NDVI_MEAN", "ah4gpas"]].corr()
-    merged = lsoa_boundaries.merge(df)
-
-    merged.plot("NDVI_MEAN", scheme="quantiles", legend=True)
-    plt.show()
