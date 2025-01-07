@@ -2,10 +2,19 @@
 
 This project processes Sentinel data to calculate vegetation indices and compile statistics for Local Super Output Areas (LSOAs). The output is saved as a Parquet file containing NDVI and EVI statistics for each LSOA.
 
+## Cloning the Repository
+
+To clone the repository, use the following command:
+
+```bash
+git clone https://github.com/cjber/ndvi.git
+cd ndvi
+```
+
 ## Prerequisites
 
 - Python 3.8 or higher
-- Required Python packages: geopandas, numpy, pandas, rasterio, rtree, scipy, shapely, tqdm, matplotlib
+- Required Python packages: dask, fastparquet, fiona, gdal, geopandas, ipdb, ipython, mapclassify, matplotlib, polars, pyarrow, pyqt6, rasterio, rtree, tqdm
 
 ## Setup
 
