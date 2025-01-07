@@ -15,28 +15,31 @@ from scipy.spatial.distance import mahalanobis
 from shapely.geometry import box
 from tqdm import tqdm
 
-nidz = (
-    gpd.read_file("./gisdata/geography-dz2021-esri-shapefile.zip")[
-        ["DZ2021_cd", "geometry"]
-    ]
-    .to_crs(4326)
-    .rename(columns={"DZ2021_cd": "LSOA21CD"})
-)
-sgdz = (
-    gpd.read_file(
-        "./gisdata/SG_DataZoneBdry_2022.zip", layer="SG_DataZoneBdry_2022_EoR"
-    )[["DZCode", "geometry"]]
-    .to_crs(4326)
-    .rename(columns={"DZCode": "LSOA21CD"})
-)
-lsoa_boundaries = gpd.read_file(
-    "./gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp"
-).to_crs(4326)[["LSOA21CD", "geometry"]]
-lsoa_boundaries = pd.concat([lsoa_boundaries, sgdz, nidz])
+
+def read_lsoa():
+    nidz = (
+        gpd.read_file("./gisdata/geography-dz2021-esri-shapefile.zip")[
+            ["DZ2021_cd", "geometry"]
+        ]
+        .to_crs(4326)
+        .rename(columns={"DZ2021_cd": "LSOA21CD"})
+    )
+    sgdz = (
+        gpd.read_file(
+            "./gisdata/SG_DataZoneBdry_2022.zip", layer="SG_DataZoneBdry_2022_EoR"
+        )[["DZCode", "geometry"]]
+        .to_crs(4326)
+        .rename(columns={"DZCode": "LSOA21CD"})
+    )
+    lsoa_boundaries = gpd.read_file(
+        "./gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp"
+    ).to_crs(4326)[["LSOA21CD", "geometry"]]
+    lsoa_boundaries = pd.concat([lsoa_boundaries, sgdz, nidz])
+    return lsoa_boundaries
 
 
 def create_rtree_index(raster_files):
-    idx = index.Index()  # Create an R-tree index
+    idx = index.Index()
     raster_bboxes = {}
     for i, raster_file in enumerate(raster_files):
         with rasterio.open(raster_file) as src:
@@ -47,7 +50,6 @@ def create_rtree_index(raster_files):
     return idx, raster_bboxes
 
 
-# Define a function to find overlapping raster tiles for each LSOA
 def find_overlapping_rasters_lsoa(lsoa, rtree_idx, raster_bboxes):
     lsoa_bbox = lsoa.geometry.bounds
     overlapping_rasters = list(rtree_idx.intersection(lsoa_bbox))
@@ -80,7 +82,7 @@ def calculate_ndvi(red_band, nir_band):
         nir_band + red_band,
         where=(nir_band + red_band) != 0,
     )
-    # Values above 1 are definite outliers, below 0.1 are likely snow/water maybe some cloud
+    # values above 1 are definite outliers, below 0.1 are likely snow/water maybe some cloud
     ndvi[(ndvi > 1) | (ndvi < 0.1)] = 0
     # remove nans (dividing by zero) and values of exactly zero
     ndvi = ndvi[(~np.isnan(ndvi)) & (ndvi != 0)]
@@ -181,36 +183,35 @@ def calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes):
         }
 
 
-# Define the path to your raster tiles
-raster_folder = "gisdata/13/**/*.tif"
+def main():
+    raster_folder = "gisdata/13/**/*.tif"
+    raster_files = glob.glob(raster_folder, recursive=True)
+    rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
-# Get all raster files in the folder using glob
-raster_files = glob.glob(raster_folder, recursive=True)
+    lsoa_boundaries = read_lsoa()
 
-# Create the R-tree index and raster bounding boxes
-rtree_idx, raster_bboxes = create_rtree_index(raster_files)
+    tasks = [
+        delayed(calculate_lsoa_stats)(lsoa, rtree_idx, raster_bboxes)
+        for lsoa in lsoa_boundaries.copy().itertuples()
+    ]
 
-# # Process each LSOA in parallel using dask
-# tasks = [
-#     delayed(calculate_lsoa_stats)(lsoa, rtree_idx, raster_bboxes)
-#     for lsoa in lsoa_boundaries.copy().itertuples()
-# ]
-#
-# with ProgressBar():
-#     results = dask.compute(*tasks)
+    with ProgressBar():
+        results = dask.compute(*tasks)
+    # results = [
+    #     calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes)
+    #     for lsoa in tqdm(lsoa_boundaries.itertuples())
+    # ]
+    df = pd.DataFrame(results)
 
-results = []
-for lsoa in tqdm(lsoa_boundaries.itertuples()):
-    results.append(calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes))
+    df.to_parquet("./gisdata/ndvi.parquet", index=False)
 
-df = pd.DataFrame(results)
 
-df.to_parquet("./gisdata/ndvi.parquet", index=False)
-df = pd.read_parquet("./gisdata/ndvi.parquet")
+if __name__ == "__main__":
+    main()
+    df = pd.read_parquet("./gisdata/ndvi.parquet")
+    ahah_gs = pd.read_csv("./gisdata/AHAH_V4.csv")[["LSOA21CD", "ah4gpas"]]
+    ahah_gs.merge(df, on="LSOA21CD")[["NDVI_MEAN", "ah4gpas"]].corr()
+    merged = lsoa_boundaries.merge(df)
 
-ahah_gs = pd.read_csv("./gisdata/AHAH_V4.csv")[["LSOA21CD", "ah4gpas"]]
-ahah_gs.merge(df, on="LSOA21CD")[["NDVI_MEAN", "ah4gpas"]].corr()
-merged = lsoa_boundaries.merge(df)
-
-merged.plot("NDVI_MEAN", scheme="quantiles", legend=True)
-plt.show()
+    merged.plot("NDVI_MEAN", scheme="quantiles", legend=True)
+    plt.show()
