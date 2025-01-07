@@ -48,7 +48,7 @@ cd ndvi
    pip install .
    ```
 
-3. Ensure the Sentinel raster data and shapefiles are placed in the appropriate directories as specified in `utils.py`.
+3. Ensure the Sentinel raster data and shapefiles are placed in the appropriate directories as specified in `src/utils.py`.
 
 ### Step 2: Install Dependencies
 
@@ -56,13 +56,15 @@ cd ndvi
 
 - **Raster Data**: Place all Sentinel raster files in the `gisdata/13` directory.
 - **Shapefiles**: Ensure the following shapefiles are available:
-  - Northern Ireland Data Zones: `gisdata/geography-dz2021-esri-shapefile.zip`
+  - Northern Ireland Data Zones: `gisdata/geography-sdz2021-esri-shapefile.zip`
   - Scottish Data Zones: `gisdata/SG_DataZoneBdry_2022.zip`
-  - LSOA Boundaries: `gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp`
+  - LSOA Boundaries: `gisdata/Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_8154990398368723939.zip`
 
 ### Step 3: Prepare Data Files
 
 ## 🔄 Processing Steps
+
+The `src/main.py` uses the following steps to process the Sentinel 2 data.
 
 1. **Read LSOA Boundaries**: The script reads and combines LSOA boundary data from Northern Ireland, Scotland, and England/Wales.
 
@@ -87,7 +89,7 @@ cd ndvi
 To run the script and generate the output file, execute:
 
 ```bash
-python main.py
+python -m src.main
 ```
 
 ### Step 2: Execute the Script
@@ -97,7 +99,7 @@ python main.py
 After running the script, you can visualize the results using the following command:
 
 ```bash
-python demo.py
+python -m src.demo
 ```
 
 This will display a plot of the mean NDVI values for each LSOA.
