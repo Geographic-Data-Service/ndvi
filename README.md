@@ -82,9 +82,9 @@ The `src/main.py` uses the following steps to process the Sentinel 2 data.
 
 6. **Save Results**: The compiled statistics are saved to a Parquet file (`gisdata/ndvi.parquet`).
 
-### Step 1: Read LSOA Boundaries
-
 ## 🚀 Running the Script
+
+### Step 1: Main processing
 
 To run the script and generate the output file, execute:
 
@@ -92,9 +92,7 @@ To run the script and generate the output file, execute:
 python -m src.main
 ```
 
-### Step 2: Execute the Script
-
-## 📊 Visualizing Results
+### Step 2: 📊 Visualizing Results
 
 After running the script, you can visualize the results using the following command:
 
