@@ -18,11 +18,13 @@ def read_lsoa():
     Returns:
         GeoDataFrame: Combined LSOA boundary data.
     """
+    # Read Northern Ireland Data Zones shapefile and rename the column for consistency
     nidz = (
         gpd.read_file(Paths.NIDZ_SHAPEFILE)[["DZ2021_cd", "geometry"]]
         .to_crs(4326)
         .rename(columns={"DZ2021_cd": "LSOA21CD"})
     )
+    # Read Scottish Data Zones shapefile and rename the column for consistency
     sgdz = (
         gpd.read_file(Paths.SGDZ_SHAPEFILE, layer="SG_DataZoneBdry_2022_EoR")[
             ["DZCode", "geometry"]
@@ -30,6 +32,7 @@ def read_lsoa():
         .to_crs(4326)
         .rename(columns={"DZCode": "LSOA21CD"})
     )
+    # Read LSOA boundaries shapefile and convert to the same coordinate reference system
     lsoa_boundaries = gpd.read_file(Paths.LSOA_BOUNDARIES_SHAPEFILE).to_crs(4326)[
         ["LSOA21CD", "geometry"]
     ]
@@ -45,6 +48,7 @@ def create_rtree_index(raster_files):
     Returns:
         tuple: R-tree index and a dictionary of raster bounding boxes.
     """
+    # Initialize R-tree index and dictionary for raster bounding boxes
     idx = index.Index()
     raster_bboxes = {}
     for i, raster_file in enumerate(raster_files):
@@ -67,6 +71,7 @@ def find_overlapping_rasters_lsoa(lsoa, rtree_idx, raster_bboxes):
     Returns:
         list: List of valid raster file paths.
     """
+    # Get the bounding box of the LSOA geometry
     lsoa_bbox = lsoa.geometry.bounds
     overlapping_rasters = list(rtree_idx.intersection(lsoa_bbox))
 
@@ -87,6 +92,7 @@ def detect_outliers(reshaped_nonzero):
     Returns:
         ndarray: Data with outliers removed.
     """
+    # Calculate the mean vector and covariance matrix for Mahalanobis distance
     mean_vector = np.mean(reshaped_nonzero, axis=0)
     cov_matrix = np.cov(reshaped_nonzero, rowvar=False)
     inv_cov_matrix = np.linalg.inv(cov_matrix)
@@ -110,11 +116,13 @@ def calculate_ndvi(red_band, nir_band):
     Returns:
         ndarray: NDVI values.
     """
+    # Calculate NDVI using the red and NIR bands
     ndvi = np.divide(
         nir_band - red_band,
         nir_band + red_band,
         where=(nir_band + red_band) != 0,
     )
+    # Filter out invalid NDVI values
     ndvi[(ndvi > 1) | (ndvi < 0.1)] = 0
     ndvi = ndvi[(~np.isnan(ndvi)) & (ndvi != 0)]
     ndvi = median_filter(ndvi, size=10)
@@ -132,6 +140,7 @@ def calculate_evi(nir_band, red_band, green_band):
     Returns:
         ndarray: EVI values.
     """
+    # Constants for EVI calculation
     G = 2.5
     C1 = 6
     C2 = 7.5
@@ -153,11 +162,14 @@ def calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes):
     Returns:
         dict: Statistics for the LSOA.
     """
+    # Find rasters overlapping with the LSOA
     overlapping_rasters = find_overlapping_rasters_lsoa(lsoa, rtree_idx, raster_bboxes)
+    # Process rasters to extract NDVI and EVI values
     all_ndvi_values, all_evi_values, all_raster_data = process_rasters(
         overlapping_rasters, lsoa
     )
 
+    # Calculate statistics if NDVI values are available
     if all_ndvi_values:
         veg_fraction = np.sum(np.array(all_ndvi_values) > 0.2) / len(all_ndvi_values)
         cv_ndvi = np.nanstd(all_ndvi_values) / np.nanmean(all_ndvi_values)
@@ -183,6 +195,7 @@ def process_rasters(overlapping_rasters, lsoa):
     Returns:
         tuple: Lists of NDVI values, EVI values, and raster data.
     """
+    # Initialize lists to store NDVI, EVI values, and raster data
     all_ndvi_values = []
     all_evi_values = []
     all_raster_data = []
@@ -194,23 +207,30 @@ def process_rasters(overlapping_rasters, lsoa):
             reshaped_data = raster_data.reshape(bands, height * width).T
             all_raster_data.extend(reshaped_data)
 
+            # Mask to filter out zero values
             zero_mask = np.all(reshaped_data != 0, axis=1)
+            # Filter out zero values from reshaped data
             reshaped_nonzero = reshaped_data[zero_mask]
             # 5% of outliers are removed
             if reshaped_nonzero.shape[0] <= 20:
                 continue
+            # Remove outliers from the data
             reshaped_nonzero_rm = detect_outliers(reshaped_nonzero)
+            # Transpose the reshaped data for band separation
             reshaped_transposed = reshaped_nonzero_rm.T
 
+            # Separate the bands for NDVI and EVI calculation
             green_band = reshaped_transposed[1]
             red_band = reshaped_transposed[2]
             nir_band = reshaped_transposed[3]
 
+            # Calculate NDVI and EVI
             ndvi = calculate_ndvi(red_band, nir_band)
             evi = calculate_evi(nir_band, red_band, green_band)
             if ndvi.size == 0:
                 continue
 
+            # Append calculated NDVI and EVI values to the lists
             all_ndvi_values.extend(ndvi.flatten())
             all_evi_values.extend(evi.flatten())
 
@@ -282,17 +302,24 @@ def compile_empty_stats(lsoa):
 
 
 def main():
+    # List all raster files in the specified folder
     raster_files = list(Paths.RASTER_FOLDER.rglob("*.tif"))
+    # Create R-tree index and bounding boxes for the raster files
     rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
+    # Read LSOA boundaries
+    # Read LSOA boundaries and merge with NDVI data for plotting
     lsoa_boundaries = read_lsoa()
 
+    # Calculate statistics for each LSOA and store the results
     results = [
         calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes)
         for lsoa in tqdm(lsoa_boundaries.itertuples())
     ]
+    # Convert results to a DataFrame
     df = pd.DataFrame(results)
 
+    # Save the DataFrame to a Parquet file
     df.to_parquet(Paths.OUTPUT_PARQUET, index=False)
 
 
@@ -300,8 +327,10 @@ if __name__ == "__main__":
     main()
 
     lsoa_boundaries = read_lsoa()
+    # Read NDVI data from a Parquet file
     df = pd.read_parquet("./gisdata/ndvi.parquet")
+    # Merge LSOA boundaries with NDVI data and plot the mean NDVI
     lsoa_boundaries.merge(df, on="LSOA21CD").plot("NDVI_MEAN")
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # Import for plotting
 
-    plt.show()
+    plt.show()  # Display the plot
