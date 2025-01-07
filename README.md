@@ -1,7 +1,5 @@
 # Sentinel Data Processing
 
-Repository: [cjber/ndvi](https://github.com/cjber/ndvi)
-
 This project processes Sentinel data to calculate vegetation indices and compile statistics for Local Super Output Areas (LSOAs). The output is saved as a Parquet file containing NDVI and EVI statistics for each LSOA.
 
 ## Prerequisites
