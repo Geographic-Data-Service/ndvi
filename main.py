@@ -329,8 +329,3 @@ if __name__ == "__main__":
     lsoa_boundaries = read_lsoa()
     # Read NDVI data from a Parquet file
     df = pd.read_parquet("./gisdata/ndvi.parquet")
-    # Merge LSOA boundaries with NDVI data and plot the mean NDVI
-    lsoa_boundaries.merge(df, on="LSOA21CD").plot("NDVI_MEAN")
-    import matplotlib.pyplot as plt  # Import for plotting
-
-    plt.show()  # Display the plot
