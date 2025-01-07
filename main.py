@@ -196,7 +196,11 @@ def process_rasters(overlapping_rasters, lsoa):
 
             zero_mask = np.all(reshaped_data != 0, axis=1)
             reshaped_nonzero = reshaped_data[zero_mask]
-            reshaped_transposed = reshaped_nonzero.T
+            # 5% of outliers are removed
+            if reshaped_nonzero.shape[0] <= 20:
+                continue
+            reshaped_nonzero_rm = detect_outliers(reshaped_nonzero)
+            reshaped_transposed = reshaped_nonzero_rm.T
 
             green_band = reshaped_transposed[1]
             red_band = reshaped_transposed[2]
@@ -294,3 +298,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    lsoa_boundaries = read_lsoa()
+    df = pd.read_parquet("./gisdata/ndvi.parquet")
+    lsoa_boundaries.merge(df, on="LSOA21CD").plot("NDVI_MEAN")
+    import matplotlib.pyplot as plt
+
+    plt.show()
