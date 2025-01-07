@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class Paths:
     """Class to manage file paths used in the project."""
 
