@@ -1,4 +1,4 @@
-from pathlib import Path
+from utils import Paths
 
 import geopandas as gpd
 import numpy as np
@@ -19,7 +19,7 @@ def read_lsoa():
         GeoDataFrame: Combined LSOA boundary data.
     """
     nidz = (
-        gpd.read_file(Path("gisdata/geography-dz2021-esri-shapefile.zip"))[
+        gpd.read_file(Paths.NIDZ_SHAPEFILE)[
             ["DZ2021_cd", "geometry"]
         ]
         .to_crs(4326)
@@ -27,13 +27,13 @@ def read_lsoa():
     )
     sgdz = (
         gpd.read_file(
-            Path("gisdata/SG_DataZoneBdry_2022.zip"), layer="SG_DataZoneBdry_2022_EoR"
+            Paths.SGDZ_SHAPEFILE, layer="SG_DataZoneBdry_2022_EoR"
         )[["DZCode", "geometry"]]
         .to_crs(4326)
         .rename(columns={"DZCode": "LSOA21CD"})
     )
     lsoa_boundaries = gpd.read_file(
-        Path("gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp")
+        Paths.LSOA_BOUNDARIES_SHAPEFILE
     ).to_crs(4326)[["LSOA21CD", "geometry"]]
     return pd.concat([lsoa_boundaries, sgdz, nidz])
 
@@ -279,8 +279,7 @@ def compile_empty_stats(lsoa):
 
 
 def main():
-    raster_folder = Path("gisdata/13")
-    raster_files = list(raster_folder.rglob("*.tif"))
+    raster_files = list(Paths.RASTER_FOLDER.rglob("*.tif"))
     rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
     lsoa_boundaries = read_lsoa()
@@ -291,7 +290,7 @@ def main():
     ]
     df = pd.DataFrame(results)
 
-    df.to_parquet(Path("gisdata/ndvi.parquet"), index=False)
+    df.to_parquet(Paths.OUTPUT_PARQUET, index=False)
 
 
 if __name__ == "__main__":
