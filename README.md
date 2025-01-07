@@ -1,5 +1,7 @@
 # Sentinel Data Processing
 
+Repository: [cjber/ndvi](https://github.com/cjber/ndvi)
+
 This project processes Sentinel data to calculate vegetation indices and compile statistics for Local Super Output Areas (LSOAs). The output is saved as a Parquet file containing NDVI and EVI statistics for each LSOA.
 
 ## Prerequisites
@@ -11,7 +13,13 @@ This project processes Sentinel data to calculate vegetation indices and compile
 
 1. Clone the repository and navigate to the project directory.
 
-2. Install the required Python packages:
+2. Install the required Python packages using `uv` (optional):
+
+   ```bash
+   uv sync
+   ```
+
+   Alternatively, you can use pip:
 
    ```bash
    pip install -r requirements.txt
