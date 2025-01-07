@@ -7,6 +7,16 @@ This project processes Sentinel data to calculate vegetation indices and compile
 
 ![NDVI Mean](./img/nvdi_mean.png)
 
+## 📚 Table of Contents
+
+- [📥 Cloning the Repository](#-cloning-the-repository)
+- [📋 Prerequisites](#-prerequisites)
+- [⚙️ Setup](#️-setup)
+- [📂 Data Files](#-data-files)
+- [🔄 Processing Steps](#-processing-steps)
+- [🚀 Running the Script](#-running-the-script)
+- [📊 Visualizing Results](#-visualizing-results)
+
 ## 📥 Cloning the Repository
 
 To clone the repository, use the following command:
@@ -22,6 +32,8 @@ cd ndvi
 - Required Python packages: fastparquet, fiona, gdal, geopandas, ipdb, ipython, mapclassify, matplotlib, polars, pyarrow, pyqt6, rasterio, rtree, tqdm
 
 ## ⚙️ Setup
+
+### Step 1: Clone the Repository
 
 1. Clone the repository and navigate to the project directory.
 
@@ -39,6 +51,8 @@ cd ndvi
 
 3. Ensure the Sentinel raster data and shapefiles are placed in the appropriate directories as specified in `utils.py`.
 
+### Step 2: Install Dependencies
+
 ## 📂 Data Files
 
 - **Raster Data**: Place all Sentinel raster files in the `gisdata/13` directory.
@@ -46,6 +60,8 @@ cd ndvi
   - Northern Ireland Data Zones: `gisdata/geography-dz2021-esri-shapefile.zip`
   - Scottish Data Zones: `gisdata/SG_DataZoneBdry_2022.zip`
   - LSOA Boundaries: `gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp`
+
+### Step 3: Prepare Data Files
 
 ## 🔄 Processing Steps
 
@@ -65,6 +81,8 @@ cd ndvi
 
 6. **Save Results**: The compiled statistics are saved to a Parquet file (`gisdata/ndvi.parquet`).
 
+### Step 1: Read LSOA Boundaries
+
 ## 🚀 Running the Script
 
 To run the script and generate the output file, execute:
@@ -72,6 +90,8 @@ To run the script and generate the output file, execute:
 ```bash
 python main.py
 ```
+
+### Step 2: Execute the Script
 
 ## 📊 Visualizing Results
 
