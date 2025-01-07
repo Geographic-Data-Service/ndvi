@@ -1,5 +1,3 @@
-from utils import Paths
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -11,6 +9,8 @@ from scipy.spatial.distance import mahalanobis
 from shapely.geometry import box
 from tqdm import tqdm
 
+from utils import Paths
+
 
 def read_lsoa():
     """Reads and combines LSOA boundary data from multiple sources.
@@ -19,22 +19,20 @@ def read_lsoa():
         GeoDataFrame: Combined LSOA boundary data.
     """
     nidz = (
-        gpd.read_file(Paths.NIDZ_SHAPEFILE)[
-            ["DZ2021_cd", "geometry"]
-        ]
+        gpd.read_file(Paths.NIDZ_SHAPEFILE)[["DZ2021_cd", "geometry"]]
         .to_crs(4326)
         .rename(columns={"DZ2021_cd": "LSOA21CD"})
     )
     sgdz = (
-        gpd.read_file(
-            Paths.SGDZ_SHAPEFILE, layer="SG_DataZoneBdry_2022_EoR"
-        )[["DZCode", "geometry"]]
+        gpd.read_file(Paths.SGDZ_SHAPEFILE, layer="SG_DataZoneBdry_2022_EoR")[
+            ["DZCode", "geometry"]
+        ]
         .to_crs(4326)
         .rename(columns={"DZCode": "LSOA21CD"})
     )
-    lsoa_boundaries = gpd.read_file(
-        Paths.LSOA_BOUNDARIES_SHAPEFILE
-    ).to_crs(4326)[["LSOA21CD", "geometry"]]
+    lsoa_boundaries = gpd.read_file(Paths.LSOA_BOUNDARIES_SHAPEFILE).to_crs(4326)[
+        ["LSOA21CD", "geometry"]
+    ]
     return pd.concat([lsoa_boundaries, sgdz, nidz])
 
 
@@ -139,8 +137,9 @@ def calculate_evi(nir_band, red_band, green_band):
     C2 = 7.5
     L = 10000
 
-    evi = G * ((nir_band - red_band) / (nir_band + C1 * red_band + C2 * green_band + L))
-    return evi
+    return G * (
+        (nir_band - red_band) / (nir_band + C1 * red_band + C2 * green_band + L)
+    )
 
 
 def calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes):
