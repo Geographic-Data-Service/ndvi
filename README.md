@@ -52,10 +52,10 @@ cd ndvi
 
 3. **Find Overlapping Rasters**: For each LSOA, the script identifies raster files that overlap with the LSOA geometry.
 
-4. **Process Rasters**: The script processes each overlapping raster to extract NDVI and EVI values:
+4. **Process Rasters and Remove Noise**: The script processes each overlapping raster to extract NDVI and EVI values and remove noise:
    - NDVI is calculated using the red and NIR bands.
    - EVI is calculated using the NIR, red, and green bands.
-   - Outliers are detected and removed using Mahalanobis distance.
+   - Noise is reduced by detecting and removing outliers using Mahalanobis distance, and applying a median filter to smooth the NDVI values.
 
 5. **Compile Statistics**: For each LSOA, the script compiles statistics such as mean, median, standard deviation, and vegetation fraction for NDVI and EVI.
 
