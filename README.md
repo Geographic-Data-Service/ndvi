@@ -56,6 +56,7 @@ cd ndvi
    - NDVI is calculated using the red and NIR bands.
    - EVI is calculated using the NIR, red, and green bands.
    - Noise is reduced by detecting and removing outliers using Mahalanobis distance, and applying a median filter to smooth the NDVI values.
+   - NDVI values are filtered to remove any below 0.1 and above 1. This aims to exclude snow or water from any calculations.
 
 5. **Compile Statistics**: For each LSOA, the script compiles statistics such as mean, median, standard deviation, and vegetation fraction for NDVI and EVI.
 
