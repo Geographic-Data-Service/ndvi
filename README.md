@@ -1,10 +1,14 @@
 # Sentinel Data Processing
 
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+
 This project processes Sentinel data to calculate vegetation indices and compile statistics for Local Super Output Areas (LSOAs). The output is saved as a Parquet file containing NDVI and EVI statistics for each LSOA.
 
-![](./img/nvdi_mean.png)
+![NDVI Mean](./img/nvdi_mean.png)
 
-## Cloning the Repository
+## 📥 Cloning the Repository
 
 To clone the repository, use the following command:
 
@@ -13,12 +17,12 @@ git clone https://github.com/cjber/ndvi.git
 cd ndvi
 ```
 
-## Prerequisites
+## 📋 Prerequisites
 
 - Python 3.8 or higher
 - Required Python packages: fastparquet, fiona, gdal, geopandas, ipdb, ipython, mapclassify, matplotlib, polars, pyarrow, pyqt6, rasterio, rtree, tqdm
 
-## Setup
+## ⚙️ Setup
 
 1. Clone the repository and navigate to the project directory.
 
@@ -36,7 +40,7 @@ cd ndvi
 
 3. Ensure the Sentinel raster data and shapefiles are placed in the appropriate directories as specified in `utils.py`.
 
-## Data Files
+## 📂 Data Files
 
 - **Raster Data**: Place all Sentinel raster files in the `gisdata/13` directory.
 - **Shapefiles**: Ensure the following shapefiles are available:
@@ -44,7 +48,7 @@ cd ndvi
   - Scottish Data Zones: `gisdata/SG_DataZoneBdry_2022.zip`
   - LSOA Boundaries: `gisdata/gov/LSOA2021/LSOA_2021_EW_BFC_V8.shp`
 
-## Processing Steps
+## 🔄 Processing Steps
 
 1. **Read LSOA Boundaries**: The script reads and combines LSOA boundary data from Northern Ireland, Scotland, and England/Wales.
 
@@ -62,7 +66,7 @@ cd ndvi
 
 6. **Save Results**: The compiled statistics are saved to a Parquet file (`gisdata/ndvi.parquet`).
 
-## Running the Script
+## 🚀 Running the Script
 
 To run the script and generate the output file, execute:
 
@@ -70,7 +74,7 @@ To run the script and generate the output file, execute:
 python main.py
 ```
 
-## Visualizing Results
+## 📊 Visualizing Results
 
 After running the script, you can visualize the results using the following command:
 
