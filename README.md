@@ -32,8 +32,6 @@ cd ndvi
 
 ## ⚙️ Setup
 
-### Step 1: Clone the Repository
-
 1. Clone the repository and navigate to the project directory.
 
 2. Install the required Python packages using `uv` or `pip`:
@@ -50,8 +48,6 @@ cd ndvi
 
 3. Ensure the Sentinel raster data and shapefiles are placed in the appropriate directories as specified in `src/utils.py`.
 
-### Step 2: Install Dependencies
-
 ## 📂 Data Files
 
 - **Raster Data**: Place all Sentinel raster files in the `gisdata/13` directory.
@@ -59,8 +55,6 @@ cd ndvi
   - Northern Ireland Data Zones: `gisdata/geography-sdz2021-esri-shapefile.zip`
   - Scottish Data Zones: `gisdata/SG_DataZoneBdry_2022.zip`
   - LSOA Boundaries: `gisdata/Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_8154990398368723939.zip`
-
-### Step 3: Prepare Data Files
 
 ## 🔄 Processing Steps
 
