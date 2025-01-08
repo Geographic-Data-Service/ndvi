@@ -325,7 +325,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    lsoa_boundaries = read_lsoa()
-    # Read NDVI data from a Parquet file
-    df = pd.read_parquet("./gisdata/ndvi.parquet")
