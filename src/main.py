@@ -276,7 +276,7 @@ def main():
     rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
     # Read LSOA boundaries
-    lsoa_boundaries = read_lsoa().head(10)
+    lsoa_boundaries = read_lsoa()
 
     # Calculate statistics for each LSOA and store the results
     results = [
@@ -292,5 +292,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    df = pd.read_parquet(Paths.OUTPUT_PARQUET)
-    ahah = pd.read_csv("./gisdata/AHAH_V4.csv")
