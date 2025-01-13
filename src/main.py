@@ -22,7 +22,7 @@ def read_lsoa():
     nidz = (
         gpd.read_file(Paths.NIDZ_SHAPEFILE)[["SDZ2021_cd", "geometry"]]
         .to_crs(4326)
-        .rename(columns={"DZ2021_cd": "LSOA21CD"})
+        .rename(columns={"SDZ2021_cd": "LSOA21CD"})
     )
     # Read Scottish Data Zones shapefile and rename the column for consistency
     sgdz = (
@@ -83,29 +83,6 @@ def find_overlapping_rasters_lsoa(lsoa, rtree_idx, raster_bboxes):
     return valid_rasters
 
 
-def detect_outliers(reshaped_nonzero):
-    """Detects outliers in the data using Mahalanobis distance.
-
-    Args:
-        reshaped_nonzero (ndarray): Non-zero reshaped data.
-
-    Returns:
-        ndarray: Data with outliers removed.
-    """
-    # Calculate the mean vector and covariance matrix for Mahalanobis distance
-    mean_vector = np.mean(reshaped_nonzero, axis=0)
-    cov_matrix = np.cov(reshaped_nonzero, rowvar=False)
-    inv_cov_matrix = np.linalg.inv(cov_matrix)
-
-    distances = np.array(
-        [mahalanobis(pixel, mean_vector, inv_cov_matrix) for pixel in reshaped_nonzero]
-    )
-
-    threshold = np.percentile(distances, 95)
-    outliers = distances > threshold
-    return reshaped_nonzero[~outliers]
-
-
 def calculate_ndvi(red_band, nir_band):
     """Calculates the Normalized Difference Vegetation Index (NDVI).
 
@@ -123,10 +100,7 @@ def calculate_ndvi(red_band, nir_band):
         where=(nir_band + red_band) != 0,
     )
     # Filter out invalid NDVI values
-    ndvi[(ndvi > 1) | (ndvi < 0.1)] = 0
-    ndvi = ndvi[(~np.isnan(ndvi)) & (ndvi != 0)]
-    ndvi = median_filter(ndvi, size=10)
-    return ndvi
+    return ndvi[(ndvi < 1) & (ndvi > -1)]
 
 
 def calculate_evi(nir_band, red_band, green_band):
@@ -146,9 +120,8 @@ def calculate_evi(nir_band, red_band, green_band):
     C2 = 7.5
     L = 10000
 
-    return G * (
-        (nir_band - red_band) / (nir_band + C1 * red_band + C2 * green_band + L)
-    )
+    evi = G * ((nir_band - red_band) / (nir_band + C1 * red_band + C2 * green_band + L))
+    return evi[(evi < 1) & (evi > -1)]
 
 
 def calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes):
@@ -211,13 +184,8 @@ def process_rasters(overlapping_rasters, lsoa):
             zero_mask = np.all(reshaped_data != 0, axis=1)
             # Filter out zero values from reshaped data
             reshaped_nonzero = reshaped_data[zero_mask]
-            # 5% of outliers are removed
-            if reshaped_nonzero.shape[0] <= 20:
-                continue
-            # Remove outliers from the data
-            reshaped_nonzero_rm = detect_outliers(reshaped_nonzero)
             # Transpose the reshaped data for band separation
-            reshaped_transposed = reshaped_nonzero_rm.T
+            reshaped_transposed = reshaped_nonzero.T
 
             # Separate the bands for NDVI and EVI calculation
             red_band = reshaped_transposed[0]
@@ -302,19 +270,18 @@ def compile_empty_stats(lsoa):
 
 
 def main():
-    # List all raster files in the specified folder
+    # List all raster files
     raster_files = list(Paths.RASTER_FOLDER.rglob("*.tif"))
     # Create R-tree index and bounding boxes for the raster files
     rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
     # Read LSOA boundaries
-    # Read LSOA boundaries and merge with NDVI data for plotting
-    lsoa_boundaries = read_lsoa()
+    lsoa_boundaries = read_lsoa().head(10)
 
     # Calculate statistics for each LSOA and store the results
     results = [
         calculate_lsoa_stats(lsoa, rtree_idx, raster_bboxes)
-        for lsoa in tqdm(lsoa_boundaries.itertuples())
+        for lsoa in tqdm(lsoa_boundaries.itertuples(), total=len(lsoa_boundaries))
     ]
     # Convert results to a DataFrame
     df = pd.DataFrame(results)
@@ -325,3 +292,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    df = pd.read_parquet(Paths.OUTPUT_PARQUET)
+    ahah = pd.read_csv("./gisdata/AHAH_V4.csv")
