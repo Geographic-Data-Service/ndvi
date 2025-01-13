@@ -220,8 +220,8 @@ def process_rasters(overlapping_rasters, lsoa):
             reshaped_transposed = reshaped_nonzero_rm.T
 
             # Separate the bands for NDVI and EVI calculation
+            red_band = reshaped_transposed[0]
             green_band = reshaped_transposed[1]
-            red_band = reshaped_transposed[2]
             nir_band = reshaped_transposed[3]
 
             # Calculate NDVI and EVI
