@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from src.main import read_lsoa
+from src.utils import Paths
 
 
 def plot_veg_frac(lsoa_boundaries, df):
@@ -17,6 +18,8 @@ def plot_veg_frac(lsoa_boundaries, df):
     merged_data = lsoa_boundaries.merge(df, on="LSOA21CD")
     plot = merged_data.plot(
         "VEG_FRAC",
+        edgecolor="face",
+        linewidth=0.5,
         ax=ax,
         legend=True,
         cmap=cmap,
@@ -37,6 +40,6 @@ def plot_veg_frac(lsoa_boundaries, df):
 
 if __name__ == "__main__":
     lsoa_boundaries = read_lsoa()
-    df = pd.read_parquet("./gisdata/ndvi.parquet")
+    df = pd.read_parquet(Paths.DATA / "ndvi.parquet")
 
     plot_veg_frac(lsoa_boundaries, df)
