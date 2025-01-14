@@ -93,6 +93,6 @@ After running the script, you can visualize the results using the following comm
 python -m src.demo
 ```
 
-This will display a plot of the mean NDVI values for each LSOA.
+This will display a plot of the mean Vegetation Fraction for each LSOA.
 
-![NDVI Mean](./img/veg_frac.png)
+![Vegetation Fraction by LSOA](./img/veg_frac.png)
