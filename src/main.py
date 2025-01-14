@@ -18,22 +18,20 @@ def read_lsoa():
     """
     # Read Northern Ireland Data Zones shapefile and rename the column for consistency
     nidz = (
-        gpd.read_file(Paths.NIDZ_SHAPEFILE)[["SDZ2021_cd", "geometry"]]
+        gpd.read_file(Paths.NIDZ)[["SDZ2021_cd", "geometry"]]
         .to_crs(4326)
         .rename(columns={"SDZ2021_cd": "LSOA21CD"})
     )
     # Read Scottish Data Zones shapefile and rename the column for consistency
     sgdz = (
-        gpd.read_file(Paths.SGDZ_SHAPEFILE, layer="SG_DataZoneBdry_2022_EoR")[
+        gpd.read_file(Paths.SGDZ, layer="SG_DataZoneBdry_2022_EoR")[
             ["DZCode", "geometry"]
         ]
         .to_crs(4326)
         .rename(columns={"DZCode": "LSOA21CD"})
     )
     # Read LSOA boundaries shapefile and convert to the same coordinate reference system
-    lsoa_boundaries = gpd.read_file(Paths.LSOA_BOUNDARIES_SHAPEFILE).to_crs(4326)[
-        ["LSOA21CD", "geometry"]
-    ]
+    lsoa_boundaries = gpd.read_file(Paths.LSOA).to_crs(4326)[["LSOA21CD", "geometry"]]
     return pd.concat([lsoa_boundaries, sgdz, nidz])
 
 
@@ -269,7 +267,7 @@ def compile_empty_stats(lsoa):
 
 def main():
     # List all raster files
-    raster_files = list(Paths.RASTER_FOLDER.rglob("*.tif"))
+    raster_files = list(Paths.RASTER.rglob("*.tif"))
     # Create R-tree index and bounding boxes for the raster files
     rtree_idx, raster_bboxes = create_rtree_index(raster_files)
 
@@ -285,7 +283,7 @@ def main():
     df = pd.DataFrame(results)
 
     # Save the DataFrame to a Parquet file
-    df.to_parquet(Paths.OUTPUT_PARQUET, index=False)
+    df.to_parquet(Paths.OUTPUT, index=False)
 
 
 if __name__ == "__main__":
