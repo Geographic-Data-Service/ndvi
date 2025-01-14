@@ -96,4 +96,4 @@ python -m src.demo
 
 This will display a plot of the mean NDVI values for each LSOA.
 
-![NDVI Mean](./img/nvdi_mean.png)
+![NDVI Mean](./img/veg_frac.png)
