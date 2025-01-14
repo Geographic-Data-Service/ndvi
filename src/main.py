@@ -4,8 +4,6 @@ import pandas as pd
 import rasterio
 from rasterio.mask import mask
 from rtree import index
-from scipy.ndimage import median_filter
-from scipy.spatial.distance import mahalanobis
 from shapely.geometry import box
 from tqdm import tqdm
 
