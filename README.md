@@ -69,12 +69,11 @@ The `src/main.py` uses the following steps to process the Sentinel 2 data.
 4. **Process Rasters and Remove Noise**: The script processes each overlapping raster to extract NDVI and EVI values and remove noise:
    - NDVI is calculated using the red and NIR bands.
    - EVI is calculated using the NIR, red, and green bands.
-   - Noise is reduced by detecting and removing outliers using Mahalanobis distance, and applying a median filter to smooth the NDVI values.
-   - NDVI values are filtered to remove any below 0.1 and above 1. This aims to exclude snow or water from any calculations.
+   - NDVI and EVI values are filtered to remove any below -1 and above 1.
 
-5. **Compile Statistics**: For each LSOA, the script compiles statistics such as mean, median, standard deviation, and vegetation fraction for NDVI and EVI.
+5. **Compile Statistics**: For each LSOA, the script compiles statistics such as mean, median, standard deviation, and vegetation fraction for NDVI.
 
-6. **Save Results**: The compiled statistics are saved to a Parquet file (`gisdata/ndvi.parquet`).
+6. **Save Results**: The compiled statistics are saved to a Parquet file (`data/ndvi.parquet`).
 
 ## 🚀 Running the Script
 
