@@ -283,7 +283,7 @@ def main():
     df = pd.DataFrame(results)
 
     # Save the DataFrame to a Parquet file
-    df.to_parquet(Paths.OUTPUT, index=False)
+    df.to_csv(Paths.OUTPUT, index=False)
 
 
 if __name__ == "__main__":

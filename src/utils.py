@@ -11,4 +11,4 @@ class Paths:
     LSOA = (
         DATA / "Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_8154990398368723939.zip"
     )
-    OUTPUT = DATA / "ndvi.parquet"
+    OUTPUT = DATA / "NDVI_2025_V1.csv"
